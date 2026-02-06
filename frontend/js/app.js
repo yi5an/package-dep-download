@@ -85,7 +85,8 @@ class TaskList {
     async fetchTasks() {
         try {
             const response = await fetch('/api/tasks');
-            this.tasks = await response.json();
+            const data = await response.json();
+            this.tasks = data.tasks || [];
             this.render();
         } catch (error) {
             console.error('获取任务列表失败:', error);
@@ -316,7 +317,7 @@ class App {
 
         // 创建隐藏的下载链接
         const link = document.createElement('a');
-        link.href = `/api/download/${this.currentTaskId}/archive`;
+        link.href = `/api/download/${this.currentTaskId}`;
         link.download = archivePath.split('/').pop();
         document.body.appendChild(link);
         link.click();
