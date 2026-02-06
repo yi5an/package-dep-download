@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Config:
     # 服务配置
     HOST: str = os.getenv("HOST", "0.0.0.0")
@@ -19,12 +20,25 @@ class Config:
 
     # 发行版配置
     DISTRIBUTIONS = {
-        "centos-7": {"type": "rpm", "name": "CentOS 7", "baseos": "https://mirrors.aliyun.com/centos/7/os/x86_64/"},
-        "centos-8": {"type": "rpm", "name": "CentOS 8", "baseos": "https://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/"},
-        "ubuntu-22": {"type": "deb", "name": "Ubuntu 22.04", "main": "http://archive.ubuntu.com/ubuntu/dists/jammy/main/"},
+        "centos-7": {
+            "type": "rpm",
+            "name": "CentOS 7",
+            "baseos": "https://mirrors.aliyun.com/centos/7/os/x86_64/",
+        },
+        "centos-8": {
+            "type": "rpm",
+            "name": "CentOS 8",
+            "baseos": "https://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/",
+        },
+        "ubuntu-22": {
+            "type": "deb",
+            "name": "Ubuntu 22.04",
+            "main": "http://archive.ubuntu.com/ubuntu/dists/jammy/main/",
+        },
     }
 
     DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 
 config = Config()

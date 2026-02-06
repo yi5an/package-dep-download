@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from backend.downloaders.http import PackageDownloader
 
+
 def test_download_single_package(tmp_path):
     """测试下载单个包"""
     downloader = PackageDownloader(max_workers=1)
@@ -10,7 +11,7 @@ def test_download_single_package(tmp_path):
     pkg = {
         "name": "test-package",
         "url": "http://example.com/test.rpm",
-        "version": "1.0"
+        "version": "1.0",
     }
 
     # Mock HTTP 响应
@@ -25,13 +26,14 @@ def test_download_single_package(tmp_path):
     assert result.exists()
     assert result.name == "test.rpm"
 
+
 def test_download_multiple_packages(tmp_path):
     """测试批量下载"""
     downloader = PackageDownloader(max_workers=2)
 
     packages = [
         {"name": "pkg1", "url": "http://example.com/pkg1.rpm"},
-        {"name": "pkg2", "url": "http://example.com/pkg2.rpm"}
+        {"name": "pkg2", "url": "http://example.com/pkg2.rpm"},
     ]
 
     mock_response = Mock()
@@ -46,13 +48,14 @@ def test_download_multiple_packages(tmp_path):
     assert len(results["success"]) == 2
     assert len(results["failed"]) == 0
 
+
 def test_download_with_progress_callback(tmp_path):
     """测试带进度回调的下载"""
     downloader = PackageDownloader(max_workers=2)
 
     packages = [
         {"name": "pkg1", "url": "http://example.com/pkg1.rpm"},
-        {"name": "pkg2", "url": "http://example.com/pkg2.rpm"}
+        {"name": "pkg2", "url": "http://example.com/pkg2.rpm"},
     ]
 
     mock_response = Mock()
@@ -72,13 +75,14 @@ def test_download_with_progress_callback(tmp_path):
     assert results["total"] == 2
     assert len(results["success"]) == 2
 
+
 def test_download_with_error(tmp_path):
     """测试下载失败处理"""
     downloader = PackageDownloader(max_workers=2)
 
     packages = [
         {"name": "pkg1", "url": "http://example.com/pkg1.rpm"},
-        {"name": "pkg2", "url": "http://example.com/pkg2.rpm"}
+        {"name": "pkg2", "url": "http://example.com/pkg2.rpm"},
     ]
 
     mock_response = Mock()
@@ -98,6 +102,7 @@ def test_download_with_error(tmp_path):
     assert len(results["success"]) == 1
     assert len(results["failed"]) == 1
     assert "Network error" in results["failed"][0]["error"]
+
 
 def test_download_package_without_url(tmp_path):
     """测试没有 URL 的包"""

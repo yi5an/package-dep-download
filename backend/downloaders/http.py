@@ -16,25 +16,18 @@ class PackageDownloader:
         self,
         packages: List[Dict],
         output_dir: Path,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> Dict:
         """批量下载包"""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        results = {
-            "success": [],
-            "failed": [],
-            "total": len(packages)
-        }
+        results = {"success": [], "failed": [], "total": len(packages)}
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = {
-                executor.submit(
-                    self._download_single,
-                    pkg,
-                    output_dir
-                ): pkg for pkg in packages
+                executor.submit(self._download_single, pkg, output_dir): pkg
+                for pkg in packages
             }
 
             for i, future in enumerate(as_completed(futures), 1):
@@ -47,10 +40,7 @@ class PackageDownloader:
                         progress_callback(i, len(packages), pkg)
 
                 except Exception as e:
-                    results["failed"].append({
-                        "package": pkg,
-                        "error": str(e)
-                    })
+                    results["failed"].append({"package": pkg, "error": str(e)})
 
         return results
 

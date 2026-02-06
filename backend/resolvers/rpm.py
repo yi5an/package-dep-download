@@ -51,9 +51,7 @@ class RPMRepodataParser:
     def parse_packages(self):
         """解析所有包信息"""
         if not self.primary_xml:
-            raise ValueError(
-                "Metadata not loaded. Call load_metadata() first."
-            )
+            raise ValueError("Metadata not loaded. Call load_metadata() first.")
 
         root = ET.fromstring(self.primary_xml)
 
@@ -77,9 +75,7 @@ class RPMRepodataParser:
 
                 version_elem = pkg.find("common:version", ns)
                 version = (
-                    version_elem.get("ver")
-                    if version_elem is not None
-                    else "unknown"
+                    version_elem.get("ver") if version_elem is not None else "unknown"
                 )
 
                 location_elem = pkg.find("common:location", ns)

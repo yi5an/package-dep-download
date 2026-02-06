@@ -6,6 +6,7 @@ from typing import Dict, Optional
 from backend.models import TaskStatus, PackageRequest
 from backend.config import config
 
+
 class TaskManager:
     """任务管理器"""
 
@@ -23,7 +24,7 @@ class TaskManager:
             status="pending",
             progress=0,
             message="任务已创建",
-            created_at=datetime.now().isoformat()
+            created_at=datetime.now().isoformat(),
         )
 
         with self.lock:
@@ -65,5 +66,6 @@ class TaskManager:
         """减少活动下载数"""
         with self.lock:
             self.active_downloads -= 1
+
 
 task_manager = TaskManager()

@@ -3,6 +3,7 @@ import gzip
 from urllib.parse import urljoin
 import re
 
+
 class DEBPackageParser:
     """DEB Packages.gz 解析器"""
 
@@ -107,7 +108,7 @@ class DEBDependencyResolver:
             part = part.strip()
 
             # 移除版本限制
-            match = re.match(r'^([a-zA-Z0-9+.-]+)', part)
+            match = re.match(r"^([a-zA-Z0-9+.-]+)", part)
             if match:
                 dep_name = match.group(1)
                 dependencies.append(dep_name)
