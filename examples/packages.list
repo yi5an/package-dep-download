@@ -1,0 +1,23 @@
+# 在此添加需要下载的包名(每行一个)
+#
+# 示例:
+
+# Web 服务器
+# nginx
+# apache2
+
+# 数据库
+# mysql-server
+# postgresql
+# redis
+
+# 开发工具
+# git
+# vim
+# python3
+# nodejs
+
+# 容器技术
+# docker-ce
+# docker-ce-cli
+# containerd.io
