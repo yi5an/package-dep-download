@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 import requests
 import gzip
 
+
 class RPMRepodataParser:
     """RPM repodata 解析器"""
 
@@ -50,13 +51,15 @@ class RPMRepodataParser:
     def parse_packages(self):
         """解析所有包信息"""
         if not self.primary_xml:
-            raise ValueError("Metadata not loaded. Call load_metadata() first.")
+            raise ValueError(
+                "Metadata not loaded. Call load_metadata() first."
+            )
 
         root = ET.fromstring(self.primary_xml)
 
         ns = {
             "common": "http://linux.duke.edu/metadata/common",
-            "rpm": "http://linux.duke.edu/metadata/rpm"
+            "rpm": "http://linux.duke.edu/metadata/rpm",
         }
 
         for pkg in root.findall(".//common:package", ns):
@@ -73,7 +76,11 @@ class RPMRepodataParser:
                 arch = arch_elem.text if arch_elem is not None else "x86_64"
 
                 version_elem = pkg.find("common:version", ns)
-                version = version_elem.get("ver") if version_elem is not None else "unknown"
+                version = (
+                    version_elem.get("ver")
+                    if version_elem is not None
+                    else "unknown"
+                )
 
                 location_elem = pkg.find("common:location", ns)
                 if location_elem is None:
@@ -94,12 +101,73 @@ class RPMRepodataParser:
                     "version": version,
                     "arch": arch,
                     "url": url,
-                    "requires": requires
+                    "requires": requires,
                 }
-            except Exception as e:
+            except Exception:
                 # 跳过解析失败的包
                 continue
 
     def find_package(self, name: str):
         """查找特定包"""
         return self.package_cache.get(name)
+
+
+class RPMDependencyResolver:
+    """RPM 依赖解析器"""
+
+    def __init__(self, parser: RPMRepodataParser):
+        self.parser = parser
+        self.resolved = set()
+
+    def resolve(self, package_name: str) -> list:
+        """
+        递归解析包及其所有依赖
+
+        返回: 包列表 (包含输入包和所有依赖)
+        """
+        if package_name in self.resolved:
+            return []
+
+        pkg = self.parser.find_package(package_name)
+        if not pkg:
+            raise ValueError(f"Package '{package_name}' not found")
+
+        packages = [pkg]
+        self.resolved.add(package_name)
+
+        # 递归解析依赖
+        for req in pkg.get("requires", []):
+            # 跳过以 / 开头的文件依赖
+            if not req or req.startswith("/"):
+                continue
+
+            # 跳过 rpmlib 依赖
+            if req.startswith("rpmlib("):
+                continue
+
+            # 递归解析
+            try:
+                dep_packages = self.resolve(req)
+                packages.extend(dep_packages)
+            except ValueError:
+                # 依赖包不存在,跳过
+                continue
+
+        return packages
+
+    def get_download_list(self, packages: list) -> list:
+        """
+        获取去重的下载列表
+
+        返回: 去重后的包列表
+        """
+        seen = set()
+        download_list = []
+
+        for pkg in packages:
+            url = pkg.get("url")
+            if url and url not in seen:
+                seen.add(url)
+                download_list.append(pkg)
+
+        return download_list
