@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>离线软件包下载工具</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 离线软件包下载工具</h1>
+        </header>
+
+        <main>
+            <section class="card">
+                <h2>创建下载任务</h2>
+
+                <div class="form-group">
+                    <label>1. 选择系统类型</label>
+                    <select id="system-type">
+                        <option value="rpm">RPM (CentOS/RHEL/Fedora)</option>
+                        <option value="deb">DEB (Debian/Ubuntu)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>2. 选择发行版</label>
+                    <select id="distribution">
+                        <option value="centos-8">CentOS 8</option>
+                        <option value="centos-7">CentOS 7</option>
+                        <option value="ubuntu-22">Ubuntu 22.04 LTS</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>3. 输入包名</label>
+                    <div id="package-tags" class="package-tags"></div>
+                    <input type="text" id="package-input" placeholder="输入包名后按回车...">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="deep-download">
+                        递归下载所有依赖
+                    </label>
+                </div>
+
+                <button id="btn-download" class="btn-primary">🚀 开始下载</button>
+            </section>
+
+            <section class="card" id="progress-section" style="display: none;">
+                <h2>📥 下载进度</h2>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar">0%</div>
+                </div>
+                <p id="progress-message">正在准备...</p>
+            </section>
+
+            <section class="card" id="tasks-section">
+                <h2>最近任务</h2>
+                <div id="task-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

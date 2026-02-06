@@ -41,5 +41,13 @@ async def get_supported_systems():
 from backend import api_routes
 app.include_router(api_routes.router)
 
-# 静态文件(前端暂未创建,先注释掉)
-# app.mount("/static", StaticFiles(directory="frontend"), name="static")
+# 静态文件服务
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """主页面"""
+    index_path = Path("frontend/index.html")
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail="前端文件未找到")
+    return HTMLResponse(content=index_path.read_text(encoding="utf-8"))
+
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
