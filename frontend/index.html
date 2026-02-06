@@ -27,16 +27,35 @@
                 <div class="form-group">
                     <label>2. 选择发行版</label>
                     <select id="distribution">
-                        <option value="centos-8">CentOS 8</option>
-                        <option value="centos-7">CentOS 7</option>
-                        <option value="ubuntu-22">Ubuntu 22.04 LTS</option>
+                        <!-- RPM 发行版 -->
+                        <option value="centos-8" data-type="rpm">CentOS 8 Stream</option>
+                        <option value="centos-7" data-type="rpm">CentOS 7</option>
+                        <option value="rhel-8" data-type="rpm">RHEL 8</option>
+                        <option value="rhel-7" data-type="rpm">RHEL 7</option>
+                        <option value="fedora" data-type="rpm">Fedora</option>
+                        <!-- DEB 发行版 -->
+                        <option value="ubuntu-24" data-type="deb">Ubuntu 24.04 LTS</option>
+                        <option value="ubuntu-22" data-type="deb">Ubuntu 22.04 LTS</option>
+                        <option value="ubuntu-20" data-type="deb">Ubuntu 20.04 LTS</option>
+                        <option value="debian-12" data-type="deb">Debian 12</option>
+                        <option value="debian-11" data-type="deb">Debian 11</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>3. 输入包名</label>
+                    <label>3. 选择架构</label>
+                    <select id="arch">
+                        <option value="x86_64">x86_64 (AMD64/Intel)</option>
+                        <option value="aarch64">aarch64 (ARM64)</option>
+                        <option value="noarch">noarch (通用)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>4. 输入包名</label>
                     <div id="package-tags" class="package-tags"></div>
-                    <input type="text" id="package-input" placeholder="输入包名后按回车...">
+                    <input type="text" id="package-input" placeholder="输入包名后按回车..." autocomplete="off">
+                    <div id="package-suggestions" class="suggestions" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">

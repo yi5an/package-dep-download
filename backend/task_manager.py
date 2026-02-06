@@ -24,6 +24,10 @@ class TaskManager:
             status="pending",
             progress=0,
             message="任务已创建",
+            packages=request.packages,
+            system_type=request.system_type,
+            distribution=request.distribution,
+            arch=request.arch,
             created_at=datetime.now().isoformat(),
         )
 

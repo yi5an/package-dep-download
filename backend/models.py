@@ -19,8 +19,13 @@ class TaskStatus(BaseModel):
     status: str  # pending, running, completed, failed
     progress: int = Field(default=0, ge=0, le=100)
     message: str
+    packages: Optional[List[str]] = None  # 添加包列表字段
     packages_count: int = 0
     total_size: str = "0 MB"
+    system_type: Optional[str] = None  # 添加系统类型
+    distribution: Optional[str] = None  # 添加发行版
+    arch: Optional[str] = None  # 添加架构
+    current_step: Optional[str] = None  # 添加当前步骤
     created_at: str
     completed_at: Optional[str] = None
     download_url: Optional[str] = None
