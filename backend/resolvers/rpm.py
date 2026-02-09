@@ -92,12 +92,22 @@ class RPMRepodataParser:
                     if req_name and not req_name.startswith("rpmlib("):
                         requires.append(req_name)
 
+                # 解析 provides - 用于处理库文件依赖
+                provides = []
+                provides_elem = pkg.find("rpm:provides", ns)
+                if provides_elem is not None:
+                    for prov in provides_elem.findall("rpm:entry", ns):
+                        prov_name = prov.get("name")
+                        if prov_name:
+                            provides.append(prov_name)
+
                 self.package_cache[name] = {
                     "name": name,
                     "version": version,
                     "arch": arch,
                     "url": url,
                     "requires": requires,
+                    "provides": provides,
                 }
             except Exception:
                 # 跳过解析失败的包
@@ -114,6 +124,17 @@ class RPMDependencyResolver:
     def __init__(self, parser: RPMRepodataParser):
         self.parser = parser
         self.resolved = set()
+        # 构建 provides 映射: 库名 -> 包名
+        self.provides_map = {}
+        self._build_provides_map()
+
+    def _build_provides_map(self):
+        """构建库文件到包的映射"""
+        for pkg_name, pkg_info in self.parser.package_cache.items():
+            for prov in pkg_info.get("provides", []):
+                # 只记录库文件 (包含 .so)
+                if ".so" in prov:
+                    self.provides_map[prov] = pkg_name
 
     def resolve(self, package_name: str) -> list:
         """
@@ -133,23 +154,58 @@ class RPMDependencyResolver:
 
         # 递归解析依赖
         for req in pkg.get("requires", []):
-            # 跳过以 / 开头的文件依赖
-            if not req or req.startswith("/"):
+            if not req:
                 continue
 
             # 跳过 rpmlib 依赖
             if req.startswith("rpmlib("):
                 continue
 
-            # 递归解析
+            # 跳过以 / 开头的文件路径依赖
+            # 这些通常由基础包提供,不在仓库中
+            if req.startswith("/"):
+                continue
+
+            # 尝试解析依赖
             try:
+                # 首先尝试直接解析为包名
                 dep_packages = self.resolve(req)
                 packages.extend(dep_packages)
             except ValueError:
-                # 依赖包不存在,跳过
-                continue
+                # 如果找不到包,尝试作为库文件查找
+                # 提取库名 (例如: libgpm.so.2()(64bit) -> libgpm.so.2)
+                lib_name = self._extract_lib_name(req)
+                if lib_name and lib_name in self.provides_map:
+                    # 找到提供这个库的包
+                    provider_pkg = self.provides_map[lib_name]
+                    try:
+                        dep_packages = self.resolve(provider_pkg)
+                        packages.extend(dep_packages)
+                    except ValueError:
+                        # 提供者包也找不到,跳过
+                        continue
+                else:
+                    # 找不到对应的包,跳过
+                    continue
 
         return packages
+
+    def _extract_lib_name(self, req: str) -> str:
+        """
+        从依赖字符串中提取库名
+
+        例如:
+        - "libgpm.so.2()(64bit)" -> "libgpm.so.2"
+        - "libperl.so()(64bit)" -> "libperl.so"
+        - "libc.so.6(GLIBC_2.2.5)(64bit)" -> "libc.so.6"
+        """
+        # 移除版本和架构标记
+        import re
+        # 匹配 .so 文件名
+        match = re.match(r'([^.]+\.so[.\d]*)', req)
+        if match:
+            return match.group(1)
+        return None
 
     def get_download_list(self, packages: list) -> list:
         """
