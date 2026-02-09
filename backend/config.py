@@ -20,20 +20,67 @@ class Config:
 
     # 发行版配置
     DISTRIBUTIONS = {
+        # RPM 发行版
         "centos-7": {
             "type": "rpm",
             "name": "CentOS 7",
             "baseos": "https://mirrors.aliyun.com/centos/7/os/x86_64/",
+            "arch": "x86_64",
         },
         "centos-8": {
             "type": "rpm",
-            "name": "CentOS 8",
-            "baseos": "https://mirrors.aliyun.com/centos/8/BaseOS/x86_64/os/",
+            "name": "CentOS 8 Stream",
+            "baseos": "https://mirrors.aliyun.com/centos/8-stream/BaseOS/x86_64/os/",
+            "arch": "x86_64",
+        },
+        "rhel-7": {
+            "type": "rpm",
+            "name": "RHEL 7",
+            "baseos": "https://mirrors.aliyun.com/centos/7/os/x86_64/",
+            "arch": "x86_64",
+        },
+        "rhel-8": {
+            "type": "rpm",
+            "name": "RHEL 8",
+            "baseos": "https://mirrors.aliyun.com/centos/8-stream/BaseOS/x86_64/os/",
+            "arch": "x86_64",
+        },
+        "fedora": {
+            "type": "rpm",
+            "name": "Fedora",
+            "baseos": "https://mirrors.aliyun.com/fedora/releases/39/Everything/x86_64/os/",
+            "arch": "x86_64",
+        },
+        # DEB 发行版
+        "ubuntu-20": {
+            "type": "deb",
+            "name": "Ubuntu 20.04 LTS (Focal)",
+            "main": "http://archive.ubuntu.com/ubuntu/dists/focal/main/",
+            "arch": "amd64",
         },
         "ubuntu-22": {
             "type": "deb",
-            "name": "Ubuntu 22.04",
+            "name": "Ubuntu 22.04 LTS (Jammy)",
             "main": "http://archive.ubuntu.com/ubuntu/dists/jammy/main/",
+            "arch": "amd64",
+        },
+        "ubuntu-24": {
+            "type": "deb",
+            "name": "Ubuntu 24.04 LTS (Noble)",
+            "main": "http://archive.ubuntu.com/ubuntu/dists/noble/main/",
+            "arch": "amd64",
+        },
+        "debian-11": {
+            "type": "deb",
+            "name": "Debian 11 (Bullseye)",
+            "main": "http://deb.debian.org/debian/dists/bullseye/main/",
+            "arch": "amd64",
+        },
+        "debian-12": {
+            "type": "deb",
+            "name": "Debian 12 (Bookworm)",
+            "main": "http://deb.debian.org/debian/dists/bookworm/main/",
+            "arch": "amd64",
         },
     }
 
