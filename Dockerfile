@@ -1,11 +1,8 @@
-# 使用阿里云 Python 基础镜像
-FROM registry.cn-hangzhou.aliyuncs.com/library/python:3.11-slim
+FROM python:3.11-slim
 
-# 设置工作目录
-WORKDIR /apt
-ARG DEBIAN_FRONTEND=noninteractive
+WORKDIR /app
 
-# 配置 apt 使用阿里云镜像源
+# 使用阿里云镜像源加速
 RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
     sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources
 
@@ -13,20 +10,11 @@ RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debia
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gcc \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && rm -rf /var/lib/apt/lists/*
 
-# 切换工作目录
-WORKDIR /app
-
-# 复制依赖文件
+# 使用 pip 国内镜像源
 COPY requirements.txt .
-
-# 配置 pip 使用清华镜像源（速度快且稳定）
-RUN pip install --no-cache-dir \
-    -i https://pypi.tuna.tsinghua.edu.cn/simple \
-    --trusted-host pypi.tuna.tsinghua.edu.cn \
-    -r requirements.txt
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
 
 # 复制项目文件
 COPY . .
@@ -35,9 +23,8 @@ COPY . .
 RUN mkdir -p downloads logs
 
 # 设置环境变量
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PATH=/root/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+ENV PATH=/root/.local/bin:$PATH
 
 # 暴露端口
 EXPOSE 8000
