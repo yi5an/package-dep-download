@@ -44,7 +44,15 @@ def run_download_task(task_id: str, request: PackageRequest):
             if not dist_config:
                 raise ValueError(f"不支持的发行版: {request.distribution}")
 
-            parser = DEBPackageParser(dist_config["main"])
+            # 映射架构: x86_64 -> amd64, aarch64 -> arm64
+            arch_mapping = {
+                "x86_64": "amd64",
+                "aarch64": "arm64",
+                "noarch": "all"
+            }
+            deb_arch = arch_mapping.get(request.arch, dist_config.get("arch", "amd64"))
+
+            parser = DEBPackageParser(dist_config["main"], arch=deb_arch)
             parser.load_packages()
 
             resolver = DEBDependencyResolver(parser)

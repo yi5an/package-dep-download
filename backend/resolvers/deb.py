@@ -7,13 +7,20 @@ import re
 class DEBPackageParser:
     """DEB Packages.gz 解析器"""
 
-    def __init__(self, mirror_url: str):
+    def __init__(self, mirror_url: str, arch: str = "amd64"):
+        """
+        Args:
+            mirror_url: Debian 镜像的基础 URL (例如: http://archive.ubuntu.com/ubuntu/dists/noble/main/)
+            arch: 架构 (amd64, arm64, etc.)
+        """
         self.mirror_url = mirror_url.rstrip("/") + "/"
+        self.arch = arch
         self.package_cache = {}
 
     def load_packages(self):
         """下载并解析 Packages.gz"""
-        packages_url = urljoin(self.mirror_url, "Packages.gz")
+        # DEB 包的 Packages.gz 文件位于 binary-<arch>/Packages.gz
+        packages_url = urljoin(self.mirror_url, f"binary-{self.arch}/Packages.gz")
 
         response = requests.get(packages_url, timeout=60)
         response.raise_for_status()
