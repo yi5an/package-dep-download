@@ -1,18 +1,41 @@
+version: '3.8'
+
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: package-downloader
     ports:
-      - "8000:8000"
+      - "${HOST_PORT:-8000}:8000"
     volumes:
       - ./downloads:/app/downloads
       - ./logs:/app/logs
     environment:
-      - MAX_CONCURRENT_DOWNLOADS=3
-      - MAX_FILE_AGE_HOURS=24
-      - LOG_LEVEL=info
+      - HOST=0.0.0.0
+      - PORT=8000
+      - MAX_CONCURRENT_DOWNLOADS=${MAX_CONCURRENT_DOWNLOADS:-3}
+      - DOWNLOAD_DIR=/app/downloads
+      - LOG_DIR=/app/logs
+    env_file:
+      - .env
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+    networks:
+      - package-downloader-network
+    labels:
+      - "com.package-downloader.description=Offline Package Download Service"
+      - "com.package-downloader.version=1.0"
+
+networks:
+  package-downloader-network:
+    driver: bridge
+
+volumes:
+  downloads:
+  logs:
