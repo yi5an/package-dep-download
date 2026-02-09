@@ -131,12 +131,17 @@ class TaskList {
     }
 
     async fetchTasks() {
-        console.log('[TaskList] 获取任务列表');
         try {
             const response = await fetch('/api/tasks');
             const data = await response.json();
-            this.tasks = data.tasks || [];
-            console.log('[TaskList] 获取到任务:', this.tasks.length);
+            const newTasks = data.tasks || [];
+
+            // 只在任务数量变化时打印日志
+            if (newTasks.length !== this.tasks.length) {
+                console.log('[TaskList] 任务数量变化:', this.tasks.length, '->', newTasks.length);
+            }
+
+            this.tasks = newTasks;
             this.render();
         } catch (error) {
             console.error('[TaskList] 获取任务列表失败:', error);
@@ -311,19 +316,66 @@ class App {
 
     initPackageSuggestions() {
         console.log('[App] 初始化包名建议');
-        // 常见包列表(按系统类型分类)
+        // 常见包列表(按系统类型分类) - 扩展版本
         this.commonPackages = {
             rpm: [
-                'bash', 'coreutils', 'vim-minimal', 'nano', 'curl',
-                'wget', 'git', 'nginx', 'docker-ce', 'podman',
-                'python3', 'python3-pip', 'nodejs', 'golang', 'java-11-openjdk',
-                'mysql', 'postgresql', 'redis', 'httpd', 'tomcat', 'openssh-server'
+                // 系统基础
+                'bash', 'coreutils', 'util-linux', 'systemd', 'shadow-utils',
+                // 文本编辑器
+                'vim-minimal', 'vim-enhanced', 'nano', 'emacs',
+                // 网络工具
+                'curl', 'wget', 'openssh', 'openssh-server', 'openssh-clients',
+                'net-tools', 'tcpdump', 'nmap', 'nc', 'telnet',
+                // 版本控制
+                'git', 'subversion', 'mercurial',
+                // 开发工具
+                'gcc', 'gcc-c++', 'make', 'cmake', 'autoconf', 'automake',
+                'python3', 'python3-pip', 'python3-devel', 'nodejs', 'golang',
+                'java-11-openjdk', 'java-17-openjdk', 'maven', 'gradle',
+                // Web 服务器
+                'nginx', 'httpd', 'tomcat',
+                // 容器
+                'docker-ce', 'podman', 'buildah',
+                // 数据库
+                'mysql', 'mysql-server', 'postgresql', 'postgresql-server',
+                'redis', 'mongodb', 'sqlite',
+                // 消息队列
+                'rabbitmq-server', 'kafka',
+                // 大数据
+                'hadoop', 'spark',
+                // 其他常用
+                'tar', 'zip', 'unzip', 'gzip', 'rsync', 'sed', 'awk',
+                'grep', 'findutils', 'psmisc', 'lsof', 'strace',
+                'htop', 'iotop', 'iftop', 'tree', 'jq'
             ],
             deb: [
-                'bash', 'coreutils', 'vim', 'nano', 'curl',
-                'wget', 'git', 'nginx', 'docker.io', 'podman',
-                'python3', 'python3-pip', 'nodejs', 'golang', 'openjdk-11-jre',
-                'mysql-server', 'postgresql', 'redis-server', 'apache2', 'openssh-server'
+                // 系统基础
+                'bash', 'coreutils', 'util-linux', 'systemd', 'passwd',
+                // 文本编辑器
+                'vim', 'nano', 'emacs',
+                // 网络工具
+                'curl', 'wget', 'openssh-client', 'openssh-server',
+                'net-tools', 'tcpdump', 'nmap', 'netcat', 'telnet',
+                // 版本控制
+                'git', 'subversion', 'mercurial',
+                // 开发工具
+                'gcc', 'g++', 'make', 'cmake', 'autoconf', 'automake',
+                'python3', 'python3-pip', 'python3-dev', 'python3-venv',
+                'nodejs', 'golang', 'openjdk-11-jre', 'openjdk-17-jre',
+                'maven', 'gradle',
+                // Web 服务器
+                'nginx', 'apache2', 'tomcat9',
+                // 容器
+                'docker.io', 'podman', 'buildah',
+                // 数据库
+                'mysql-server', 'postgresql', 'postgresql-server',
+                'redis-server', 'mongodb', 'sqlite3',
+                // 消息队列
+                'rabbitmq-server', 'kafka',
+                // 其他常用
+                'tar', 'zip', 'unzip', 'gzip', 'rsync', 'sed', 'awk',
+                'grep', 'findutils', 'psmisc', 'lsof', 'strace',
+                'htop', 'iotop', 'iftop', 'tree', 'jq'
             ]
         };
 
@@ -342,10 +394,33 @@ class App {
 
         console.log('[App] 系统类型:', systemType, '可用包数量:', packages.length);
 
-        // 过滤匹配的包
-        const matches = packages.filter(pkg =>
-            pkg.toLowerCase().startsWith(query.toLowerCase())
-        );
+        const queryLower = query.toLowerCase();
+
+        // 匹配并评分: 前缀匹配优先,包含匹配次之
+        const matchesWithScore = packages.map(pkg => {
+            const pkgLower = pkg.toLowerCase();
+            let score = 0;
+
+            // 前缀匹配 (最高优先级)
+            if (pkgLower.startsWith(queryLower)) {
+                score = 100;
+            }
+            // 包含匹配 (中等优先级)
+            else if (pkgLower.includes(queryLower)) {
+                score = 50;
+                // 查询出现的位置越靠前,分数越高
+                const index = pkgLower.indexOf(queryLower);
+                score += (50 - index);
+            }
+
+            return { pkg, score };
+        }).filter(item => item.score > 0);
+
+        // 按分数降序排序
+        const matches = matchesWithScore
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10) // 最多显示10个结果
+            .map(item => item.pkg);
 
         console.log('[App] 匹配的包:', matches);
 
