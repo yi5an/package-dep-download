@@ -28,6 +28,10 @@ services:
       start_period: 10s
     networks:
       - package-downloader-network
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+      - 223.5.5.5
     labels:
       - "com.package-downloader.description=Offline Package Download Service"
       - "com.package-downloader.version=1.0"
